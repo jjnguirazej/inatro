@@ -25,12 +25,60 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const workbook = XLSX.read(buffer, { type: "buffer" });
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-    const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, {
-      defval: "",
-    });
+    const fileName = file.name.toLowerCase();
+    const isCsv = fileName.endsWith(".csv");
+
+    let rawRows: unknown[][];
+
+    if (isCsv) {
+      // Parse CSV manually
+      const text = buffer.toString("utf-8");
+      const lines = text
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
+      rawRows = lines.map((line) =>
+        line.split(",").map((cell) => cell.trim().replace(/^"|"$/g, ""))
+      );
+    } else {
+      const workbook = XLSX.read(buffer, { type: "buffer" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      rawRows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        defval: "",
+      }) as unknown[][];
+    }
+
+    // Find the row index that contains the real headers (has "Nome" or "Nº da Carta" / "N° da Carta")
+    const headerRowIndex = rawRows.findIndex((row) =>
+      (row as string[]).some((cell) => {
+        const val = String(cell ?? "").trim().toLowerCase();
+        return val === "nome" || val.includes("carta");
+      })
+    );
+
+    if (headerRowIndex === -1 || headerRowIndex >= rawRows.length - 1) {
+      return NextResponse.json(
+        { error: "Ficheiro vazio ou formato inválido." },
+        { status: 400 }
+      );
+    }
+
+    const headers = (rawRows[headerRowIndex] as string[]).map((h) =>
+      String(h ?? "").trim()
+    );
+    const dataRows = rawRows.slice(headerRowIndex + 1);
+
+    const rows: Record<string, unknown>[] = dataRows
+      .filter((row) => (row as unknown[]).some((cell) => String(cell ?? "").trim() !== ""))
+      .map((row) => {
+        const obj: Record<string, unknown> = {};
+        headers.forEach((h, i) => {
+          obj[h] = (row as unknown[])[i] ?? "";
+        });
+        return obj;
+      });
 
     if (rows.length === 0) {
       return NextResponse.json(
@@ -89,25 +137,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Upsert by numeroCarta
+    // Insert only — never update existing records
     let inserted = 0;
-    let updated = 0;
+    let skipped = 0;
     for (const carta of cartas) {
       if (!carta) continue;
-      const result = await Carta.updateOne(
-        { numeroCarta: carta.numeroCarta },
-        { $set: carta },
-        { upsert: true }
-      );
-      if (result.upsertedCount) inserted++;
-      else if (result.modifiedCount) updated++;
+      const exists = await Carta.exists({ numeroCarta: carta.numeroCarta });
+      if (exists) {
+        skipped++;
+      } else {
+        await Carta.create(carta);
+        inserted++;
+      }
     }
 
     return NextResponse.json({
       success: true,
       total: cartas.length,
       inserted,
-      updated,
+      skipped,
     });
   } catch (err) {
     console.error("[cartas/upload]", err);

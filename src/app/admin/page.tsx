@@ -76,7 +76,7 @@ export default function AdminPage() {
         setUploadError(data.error || "Erro ao fazer upload.");
       } else {
         setUploadMsg(
-          "Upload concluido: " + data.total + " registos (" + data.inserted + " novos, " + data.updated + " actualizados)"
+          `Upload concluído: ${data.total} registos (${data.inserted} novos inseridos, ${data.skipped} já existentes ignorados)`
         );
         fetchCartas(1);
       }
@@ -101,14 +101,14 @@ export default function AdminPage() {
 
       {/* Upload section */}
       <section className="bg-white rounded-2xl shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">Importar Ficheiro Excel</h3>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Importar Ficheiro</h3>
         <form onSubmit={handleUpload} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Ficheiro (.xls / .xlsx)</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Ficheiro (.xls / .xlsx / .csv)</label>
               <input
                 type="file"
-                accept=".xls,.xlsx"
+                accept=".xls,.xlsx,.csv"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
                 className="block w-full text-sm text-gray-600 border border-gray-300 rounded-lg px-3 py-2 cursor-pointer"
                 required
@@ -140,7 +140,7 @@ export default function AdminPage() {
             disabled={uploading}
             className="bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white font-bold px-6 py-2.5 rounded-lg transition-colors text-sm"
           >
-            {uploading ? "A carregar..." : "Importar Excel"}
+            {uploading ? "A carregar..." : "Importar Ficheiro"}
           </button>
           {uploadMsg && (
             <p className="text-green-700 text-sm font-medium">{uploadMsg}</p>
