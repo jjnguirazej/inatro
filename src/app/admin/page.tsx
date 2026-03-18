@@ -10,6 +10,8 @@ interface Carta {
   lote?: string;
   delegacao?: string;
   obs?: string;
+  entregue: boolean;
+  entregueEm?: string;
 }
 
 export default function AdminPage() {
@@ -22,6 +24,7 @@ export default function AdminPage() {
   const [filterNumero, setFilterNumero] = useState("");
   const [filterNome, setFilterNome] = useState("");
   const [filterDelegacao, setFilterDelegacao] = useState("");
+  const [filterEntregue, setFilterEntregue] = useState<"" | "sim" | "nao">("");
 
   // upload state
   const [file, setFile] = useState<File | null>(null);
@@ -42,6 +45,7 @@ export default function AdminPage() {
     if (filterNumero) params.set("numero", filterNumero);
     if (filterNome) params.set("nome", filterNome);
     if (filterDelegacao) params.set("delegacao", filterDelegacao);
+    if (filterEntregue) params.set("entregue", filterEntregue);
 
     try {
       const res = await fetch("/api/cartas?" + params.toString());
@@ -57,7 +61,7 @@ export default function AdminPage() {
     fetchCartas(1);
     setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterNumero, filterNome, filterDelegacao]);
+  }, [filterNumero, filterNome, filterDelegacao, filterEntregue]);
 
   async function handleUpload(e: FormEvent) {
     e.preventDefault();
@@ -90,6 +94,18 @@ export default function AdminPage() {
   async function handleDelete(id: string) {
     if (!confirm("Eliminar este registo?")) return;
     await fetch("/api/cartas?id=" + id, { method: "DELETE" });
+    fetchCartas(page);
+  }
+
+  async function handleToggleEntregue(id: string, atual: boolean) {
+    const novoEstado = !atual;
+    const label = novoEstado ? "marcar como entregue" : "marcar como não entregue";
+    if (!confirm(`Confirmas ${label}?`)) return;
+    await fetch("/api/cartas", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, entregue: novoEstado }),
+    });
     fetchCartas(page);
   }
 
@@ -156,7 +172,7 @@ export default function AdminPage() {
         <h3 className="text-lg font-semibold text-gray-700 mb-4">
           Pesquisar Cartas ({total} registos)
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
           <input
             type="text"
             placeholder="Nr. Carta"
@@ -178,6 +194,15 @@ export default function AdminPage() {
             onChange={(e) => setFilterDelegacao(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-green-500 text-sm"
           />
+          <select
+            value={filterEntregue}
+            onChange={(e) => setFilterEntregue(e.target.value as "" | "sim" | "nao")}
+            className="border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-green-500 text-sm bg-white"
+          >
+            <option value="">Todos os estados</option>
+            <option value="sim">✅ Entregues</option>
+            <option value="nao">⏳ Não entregues</option>
+          </select>
         </div>
 
         {loading ? (
@@ -194,25 +219,39 @@ export default function AdminPage() {
                     <th className="px-4 py-3">Lote</th>
                     <th className="px-4 py-3">Delegacao</th>
                     <th className="px-4 py-3">OBS</th>
+                    <th className="px-4 py-3">Estado</th>
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {cartas.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-4 py-6 text-center text-gray-400">
+                      <td colSpan={8} className="px-4 py-6 text-center text-gray-400">
                         Nenhum registo encontrado.
                       </td>
                     </tr>
                   )}
                   {cartas.map((c) => (
-                    <tr key={c._id} className="hover:bg-gray-50">
+                    <tr key={c._id} className={`hover:bg-gray-50 ${c.entregue ? "bg-green-50" : ""}`}>
                       <td className="px-4 py-3 font-mono text-gray-700">{c.numeroCarta}</td>
                       <td className="px-4 py-3 text-gray-800">{c.nome}</td>
                       <td className="px-4 py-3 text-gray-600">{c.ano || "-"}</td>
                       <td className="px-4 py-3 text-gray-600">{c.lote || "-"}</td>
                       <td className="px-4 py-3 text-gray-600">{c.delegacao || "-"}</td>
                       <td className="px-4 py-3 text-gray-500 italic">{c.obs || "-"}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => handleToggleEntregue(c._id, c.entregue)}
+                          title={c.entregue && c.entregueEm ? `Entregue em ${new Date(c.entregueEm).toLocaleDateString("pt-PT")}` : "Marcar como entregue"}
+                          className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full transition-colors ${
+                            c.entregue
+                              ? "bg-green-100 text-green-700 hover:bg-green-200"
+                              : "bg-gray-100 text-gray-500 hover:bg-yellow-100 hover:text-yellow-700"
+                          }`}
+                        >
+                          {c.entregue ? "✅ Entregue" : "⏳ Pendente"}
+                        </button>
+                      </td>
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleDelete(c._id)}

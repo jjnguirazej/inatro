@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
   const numero = searchParams.get("numero")?.trim() || "";
   const nome = searchParams.get("nome")?.trim() || "";
   const delegacao = searchParams.get("delegacao")?.trim() || "";
+  const entregueFilter = searchParams.get("entregue"); // "sim" | "nao" | null
   const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
   const limit = Math.min(100, parseInt(searchParams.get("limit") || "20"));
 
@@ -24,6 +25,8 @@ export async function GET(req: NextRequest) {
     if (numero) filter.numeroCarta = { $regex: numero, $options: "i" };
     if (nome) filter.nome = { $regex: nome, $options: "i" };
     if (delegacao) filter.delegacao = { $regex: delegacao, $options: "i" };
+    if (entregueFilter === "sim") filter.entregue = true;
+    if (entregueFilter === "nao") filter.entregue = { $ne: true };
 
     const total = await Carta.countDocuments(filter);
     const cartas = await Carta.find(filter)
@@ -35,6 +38,32 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ cartas, total, page, limit });
   } catch (err) {
     console.error("[cartas/list]", err);
+    return NextResponse.json({ error: "Erro interno." }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  const session = await getSessionFromCookies();
+  if (!session || session.role !== "admin") {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  }
+
+  const { id, entregue } = await req.json();
+  if (!id) {
+    return NextResponse.json({ error: "ID obrigatório." }, { status: 400 });
+  }
+
+  try {
+    await connectDB();
+    const carta = await Carta.findByIdAndUpdate(
+      id,
+      { entregue, entregueEm: entregue ? new Date() : null },
+      { new: true }
+    ).lean();
+    if (!carta) return NextResponse.json({ error: "Carta não encontrada." }, { status: 404 });
+    return NextResponse.json({ success: true, carta });
+  } catch (err) {
+    console.error("[cartas/patch]", err);
     return NextResponse.json({ error: "Erro interno." }, { status: 500 });
   }
 }
