@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run clean",
     "build": "next build",
     "postbuild": "echo 'Build ID:' && cat .next/BUILD_ID",
     "start": "next start",
     "lint": "eslint",
-    "clean": "rm -rf .next"
+    "clean": "rm -rf .next",
+    "clean:full": "rm -rf .next node_modules/.cache",
+    "deploy:hostinger": "npm run clean:full && npm install && npm run build"
   },
   "dependencies": {
     "@types/bcryptjs": "^3.0.0",

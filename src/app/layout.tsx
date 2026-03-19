@@ -25,13 +25,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt" suppressHydrationWarning>
+    <html lang="pt" suppressHydrationWarning style={{colorScheme: 'light'}}>
       <head>
         <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
       </head>
-      <body className={`${geist.className} bg-gray-100 min-h-screen antialiased`} suppressHydrationWarning>
+      <body 
+        className={`${geist.className} antialiased`}
+        style={{
+          background: 'var(--background)',
+          color: 'var(--foreground)',
+          minHeight: '100vh'
+        }}
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

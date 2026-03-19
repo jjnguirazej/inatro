@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Versão: 2.0.0 - Força reload em todos dispositivos */
+/* Versão: 3.0.0 - Fixed for Tailwind v4 production builds */
 
 * {
   -webkit-tap-highlight-color: transparent;
@@ -10,13 +10,10 @@
   --background: #ffffff;
   --foreground: #171717;
   color-scheme: light;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  
+  /* Tailwind v4 custom properties - must be in :root for production */
+  --color-background: #ffffff;
+  --color-foreground: #171717;
 }
 
 html {
