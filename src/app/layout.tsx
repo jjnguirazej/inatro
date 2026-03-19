@@ -30,14 +30,28 @@ export default function RootLayout({
         <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
+        {/* Prevent FOUC - Force CSS variables before render */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            :root {
+              --background: #ffffff;
+              --foreground: #171717;
+              color-scheme: light;
+            }
+            html {
+              -webkit-font-smoothing: antialiased;
+              -moz-osx-font-smoothing: grayscale;
+            }
+            body {
+              background: #ffffff;
+              color: #171717;
+              min-height: 100vh;
+            }
+          `
+        }} />
       </head>
       <body 
         className={`${geist.className} antialiased`}
-        style={{
-          background: 'var(--background)',
-          color: 'var(--foreground)',
-          minHeight: '100vh'
-        }}
         suppressHydrationWarning
       >
         {children}

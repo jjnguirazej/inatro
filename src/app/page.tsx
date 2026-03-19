@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent } from "react";
 import Image from "next/image";
 
 interface CartaResult {
@@ -18,21 +18,6 @@ export default function HomePage() {
   const [found, setFound] = useState<boolean | null>(null);
   const [carta, setCarta] = useState<CartaResult | null>(null);
   const [error, setError] = useState("");
-
-  // Forçar reload de CSS em dispositivos com cache
-  useEffect(() => {
-    // Limpar cache do navegador
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        registrations.forEach((registration) => registration.unregister());
-      });
-    }
-    
-    // Forçar repaint
-    document.body.style.display = 'none';
-    document.body.offsetHeight;
-    document.body.style.display = '';
-  }, []);
 
   async function handleSearch(e: FormEvent) {
     e.preventDefault();

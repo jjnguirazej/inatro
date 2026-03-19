@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // CRITICAL: Configuration for Hostinger shared hosting compatibility
-  output: "export", // Only for Docker, not for Hostinger
+  // DO NOT use "output: export" - it breaks Node.js mode on Hostinger
   
   // NOTE: Next.js 16 uses Turbopack by default in production
   // Currently cannot be disabled via config (it's the new default)
