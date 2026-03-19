@@ -7,6 +7,8 @@ export interface ICarta extends Document {
   lote?: string;
   delegacao?: string;
   obs?: string;
+  entregue: boolean;
+  entregueEm?: Date;
   uploadedAt: Date;
 }
 
@@ -18,6 +20,8 @@ const CartaSchema = new Schema<ICarta>(
     lote: { type: String },
     delegacao: { type: String },
     obs: { type: String },
+    entregue: { type: Boolean, default: false, index: true },
+    entregueEm: { type: Date },
   },
   { timestamps: true }
 );

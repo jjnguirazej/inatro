@@ -57,15 +57,15 @@ export default function HomePage() {
             priority
           />
           <h1 className="text-center font-bold text-gray-800 text-lg leading-tight">
-            DELEGACAO DA PROVINCIA DE SOFALA
+            DELEGAÇÃO DA PROVÍNCIA DE SOFALA
           </h1>
           <span className="mt-2 px-3 py-1 rounded-full text-sm font-semibold text-white bg-yellow-500">
-            Aviso: Apenas para Utentes desta Delegacao
+            Aviso: Apenas para Utentes desta Delegação
           </span>
         </div>
 
         <p className="text-center text-gray-600 mb-6">
-          Insira o numero da sua carta para verificar o estado de disponibilidade.
+          Insira o número da sua carta para verificar o estado de disponibilidade.
         </p>
 
         <form onSubmit={handleSearch} className="space-y-4">
@@ -90,7 +90,7 @@ export default function HomePage() {
               type="text"
               value={numero}
               onChange={(e) => setNumero(e.target.value)}
-              placeholder="Numero da Carta"
+              placeholder="Número da Carta"
               className="flex-1 py-3 px-2 outline-none text-gray-700 bg-transparent"
               required
             />
@@ -127,9 +127,9 @@ export default function HomePage() {
 
         {found === false && (
           <div className="mt-4 p-4 border border-red-300 bg-red-50 rounded-lg text-center">
-            <p className="text-red-700 font-semibold">Carta nao encontrada.</p>
+            <p className="text-red-700 font-semibold">Carta não encontrada.</p>
             <p className="text-red-600 text-sm mt-1">
-              O numero <strong>{numero}</strong> nao consta na nossa lista.
+              O número <strong>{numero}</strong> não consta na nossa lista.
             </p>
           </div>
         )}
@@ -145,7 +145,7 @@ export default function HomePage() {
               </p>
             </div>
             <p className="text-center text-gray-600 text-sm">
-              Sua carta encontra-se disponivel nos seguintes locais:
+              Sua carta encontra-se disponível nos seguintes locais:
             </p>
             <div className="border-2 border-dashed border-green-300 bg-green-50 rounded-lg p-3 flex items-center justify-center gap-2">
               <svg
@@ -171,12 +171,12 @@ export default function HomePage() {
               <span className="font-semibold text-green-800">
                 {carta.lote
                   ? "LOTE: " + carta.lote
-                  : carta.delegacao || "Consulte a delegacao"}
+                  : carta.delegacao || "Consulte a delegação"}
               </span>
             </div>
             {carta.delegacao && (
               <p className="text-center text-gray-500 text-sm">
-                Por favor, dirija-se a Delegacao Provincial de{" "}
+                Por favor, dirija-se à Delegação Provincial de{" "}
                 <strong>{carta.delegacao}</strong>.
               </p>
             )}
