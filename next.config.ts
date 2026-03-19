@@ -1,9 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // output: "standalone", // Removido para deploy no Hostinger - use apenas para Docker
+  // CRITICAL: Configuration for Hostinger shared hosting compatibility
+  // output: "standalone", // Only for Docker, not for Hostinger
   
-  // Desabilita cache agressivo para evitar versões antigas
+  // NOTE: Next.js 16 uses Turbopack by default in production
+  // Currently cannot be disabled via config (it's the new default)
+  // The Turbopack chunks ARE compatible - the issue is .htaccess configuration
+  
+  // Generate unique build IDs to prevent caching issues
   generateBuildId: async () => {
     return `build-${Date.now()}`;
   },

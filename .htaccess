@@ -1,5 +1,5 @@
-# Next.js + Hostinger Configuration
-# CRITICAL: This file must also be copied to your Hostinger root directory!
+# Next.js + Hostinger Root Configuration
+# Place this file in your Hostinger public_html root directory
 
 # Enable RewriteEngine
 <IfModule mod_rewrite.c>
@@ -7,14 +7,14 @@
   RewriteBase /
 </IfModule>
 
-# FORCE CORRECT MIME TYPES (fixes "text/plain" errors)
+# CRITICAL: Force correct MIME types for Next.js chunks
 <IfModule mod_mime.c>
-  # JavaScript - CRITICAL for Next.js
+  # JavaScript
   AddType application/javascript .js
   AddType application/javascript .mjs
   AddType text/javascript .js
   
-  # CSS - CRITICAL for styling
+  # CSS
   AddType text/css .css
   
   # Fonts
@@ -37,34 +37,32 @@
   AddType application/manifest+json .webmanifest
 </IfModule>
 
-# Cache control for Next.js static assets
+# CRITICAL: Set Content-Type header explicitly
 <IfModule mod_headers.c>
-  # CRITICAL: Set correct Content-Type for all responses
   <FilesMatch "\.(js|mjs)$">
     Header set Content-Type "application/javascript; charset=utf-8"
-    Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
   
   <FilesMatch "\.(css)$">
     Header set Content-Type "text/css; charset=utf-8"
-    Header set Cache-Control "public, max-age=31536000, immutable"
-  </FilesMatch>
-  
-  <FilesMatch "\.(woff2|woff|ttf|eot|otf)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
-  </FilesMatch>
-  
-  # No cache for HTML
-  <FilesMatch "\.(html|htm)$">
-    Header set Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
-    Header set Pragma "no-cache"
-    Header set Expires "0"
   </FilesMatch>
   
   # Security headers
   Header set X-Content-Type-Options "nosniff"
   Header set X-Frame-Options "SAMEORIGIN"
-  Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Cache control
+<IfModule mod_headers.c>
+  # Next.js static chunks - immutable
+  <FilesMatch "^.+\.(js|css|woff2|woff)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  
+  # HTML - no cache
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate"
+  </FilesMatch>
 </IfModule>
 
 # Disable directory listing
@@ -75,6 +73,6 @@ Options -Indexes +FollowSymLinks
   AddOutputFilterByType DEFLATE text/html text/plain text/css
   AddOutputFilterByType DEFLATE application/javascript text/javascript
   AddOutputFilterByType DEFLATE application/json
-  AddOutputFilterByType DEFLATE text/xml application/xml application/xhtml+xml
+  AddOutputFilterByType DEFLATE text/xml application/xml
   AddOutputFilterByType DEFLATE image/svg+xml
 </IfModule>
