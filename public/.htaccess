@@ -1,0 +1,21 @@
+# Forçar recarregamento de arquivos HTML/JSON
+<filesMatch ".(html|htm|js|json)$">
+  FileETag None
+  Header unset ETag
+  Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+  Header set Pragma "no-cache"
+  Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+</filesMatch>
+
+# Cache para imagens e CSS
+<filesMatch ".(css|jpg|jpeg|png|gif|ico|svg|webp)$">
+  Header set Cache-Control "max-age=2592000, public"
+</filesMatch>
+
+# Garantir MIME types corretos
+<IfModule mod_mime.c>
+  AddType text/css .css
+  AddType application/javascript .js
+  AddType image/svg+xml .svg
+  AddType image/webp .webp
+</IfModule>
