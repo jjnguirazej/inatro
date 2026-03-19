@@ -1,23 +1,29 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone", // Removido para deploy no Hostinger - use apenas para Docker
+  // Cache busting: força reload automático adicionando timestamp
+  // Remove output standalone para Hostinger
   
-  // Desabilita cache agressivo para evitar versões antigas
+  // Gera Build ID único baseado em timestamp
   generateBuildId: async () => {
     return `build-${Date.now()}`;
+  },
+  
+  // Adiciona versão aos assets para forçar reload
+  env: {
+    NEXT_PUBLIC_BUILD_TIME: Date.now().toString(),
   },
   
   // Headers para controlar cache e CSS
   async headers() {
     return [
       {
-        // Páginas HTML - sem cache
+        // Páginas HTML - NUNCA fazer cache
         source: "/:path*",
         headers: [
           {
             key: "Cache-Control",
-            value: "no-store, no-cache, must-revalidate, proxy-revalidate",
+            value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
           },
           {
             key: "Pragma",
@@ -30,6 +36,10 @@ const nextConfig: NextConfig = {
           {
             key: "X-Content-Type-Options",
             value: "nosniff",
+          },
+          {
+            key: "Surrogate-Control",
+            value: "no-store",
           },
         ],
       },

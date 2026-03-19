@@ -1,0 +1,75 @@
+# Next.js + Hostinger - ANTI-CACHE Configuration
+# Força sempre pegar versão mais recente do servidor
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+</IfModule>
+
+# CRITICAL: Force correct MIME types
+<IfModule mod_mime.c>
+  AddType application/javascript .js .mjs
+  AddType text/css .css
+  AddType font/woff2 .woff2
+  AddType font/woff .woff
+  AddType image/svg+xml .svg
+  AddType image/webp .webp
+  AddType application/json .json
+</IfModule>
+
+# ANTI-CACHE: Nunca cachear HTML, JS, CSS
+<IfModule mod_headers.c>
+  # HTML - NUNCA cachear
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+    FileETag None
+    Header unset ETag
+  </FilesMatch>
+  
+  # JavaScript - NUNCA cachear
+  <FilesMatch "\.(js|mjs)$">
+    Header set Content-Type "application/javascript; charset=utf-8"
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+    FileETag None
+    Header unset ETag
+  </FilesMatch>
+  
+  # CSS - NUNCA cachear
+  <FilesMatch "\.(css)$">
+    Header set Content-Type "text/css; charset=utf-8"
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+    FileETag None
+    Header unset ETag
+  </FilesMatch>
+  
+  # Fonts - podem ter cache (são estáticos)
+  <FilesMatch "\.(woff2|woff|ttf|eot|otf)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  
+  # Imagens - cache moderado
+  <FilesMatch "\.(jpg|jpeg|png|gif|svg|webp|ico)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+  
+  # Security headers
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# Disable directory listing
+Options -Indexes +FollowSymLinks
+
+# Enable gzip compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css
+  AddOutputFilterByType DEFLATE application/javascript text/javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
