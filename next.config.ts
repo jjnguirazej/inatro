@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // output: "standalone", // Removido para deploy no Hostinger - use apenas para Docker
+  output: "standalone", // Removido para deploy no Hostinger - use apenas para Docker
   
   // Desabilita cache agressivo para evitar versões antigas
   generateBuildId: async () => {
